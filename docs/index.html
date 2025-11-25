@@ -1,0 +1,1189 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>清璃俱乐部 - 陪伴不止于玩耍</title>
+    <!-- 引入Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- 引入Font Awesome -->
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <!-- 引入Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js"></script>
+    
+    <!-- 配置Tailwind自定义颜色和字体 -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#7B61FF',
+                        secondary: '#22D3EE',
+                        dark: '#0F172A',
+                        light: '#F8FAFC',
+                        accent: '#EC4899',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                        display: ['Montserrat', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+    
+    <!-- 自定义样式 -->
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .content-auto {
+                content-visibility: auto;
+            }
+            .text-shadow {
+                text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            }
+            .text-gradient {
+                background-clip: text;
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+            }
+            .bg-glass {
+                backdrop-filter: blur(12px);
+                -webkit-backdrop-filter: blur(12px);
+            }
+            .hover-scale {
+                transition: transform 0.3s ease;
+            }
+            .hover-scale:hover {
+                transform: scale(1.03);
+            }
+        }
+    </style>
+    
+    <!-- 预加载字体 -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Montserrat:wght@500;600;700&display=swap" rel="stylesheet">
+
+
+     
+     <style>
+         /* 回到顶部按钮样式 */
+         #backToTop {
+             position: fixed;
+             bottom: 80px;
+             right: 20px;
+             z-index: 100;
+             background: rgba(123, 97, 255, 0.9);
+             color: white;
+             border: none;
+             border-radius: 50%;
+             width: 50px;
+             height: 50px;
+             cursor: pointer;
+             display: flex;
+             align-items: center;
+             justify-content: center;
+             box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+             transition: all 0.3s ease;
+             opacity: 0;
+         }
+         
+         #backToTop:hover {
+             background: rgba(123, 97, 255, 1);
+             transform: scale(1.1);
+         }
+     </style>
+
+</head>
+  <body class="bg-dark text-light antialiased">
+    <!-- 访问前台弹窗 - 模态对话框 -->
+    <div id="welcomeModal" class="fixed inset-0 bg-black/70 flex items-center justify-center z-[9999] cursor-not-allowed">
+      <div class="bg-dark/90 border-2 border-purple-500 rounded-2xl p-4 sm:p-6 md:p-8 max-w-lg w-full mx-4 transform transition-all cursor-default focus:outline-none">
+        <div class="text-center mb-4 sm:mb-6">
+          <h3 class="text-xl sm:text-2xl font-bold text-white mb-3 sm:mb-4">欢迎访问清璃俱乐部官方网站</h3>
+          <p class="text-light/80 leading-relaxed text-sm sm:text-base">
+            基于您的访问目的，我们有三条建议，如果您是我们的客户，想要下单我们的相关服务，建议直接访问价格表栏目，如果您想成为我们的一员，建议直接访问纳新公告栏，如果您只想访问全站，可以直接点击下方了解关闭此窗口，此外，经过测试pc访问者使用部分浏览器会导致网站内容发生不可修复的错位。建议pc访问者使用edge访问本站，祝您在清璃玩的开心！
+          </p>
+        </div>
+        <div class="flex justify-center">
+          <button id="closeModalBtn" class="bg-gradient-to-r from-purple-600 to-purple-800 hover:from-purple-500 hover:to-purple-700 text-white font-medium py-2 sm:py-3 px-6 sm:px-8 rounded-full transition-all hover:scale-105 hover:shadow-lg hover:shadow-purple-500/30 w-full sm:w-auto">
+            了解
+          </button>
+        </div>
+      </div>
+    </div>
+    
+    <script>
+      // 弹窗关闭功能
+      function closeModal() {
+        const modal = document.getElementById('welcomeModal');
+        modal.style.opacity = '0';
+        
+        // 移除滚动限制
+        document.body.classList.remove('overflow-hidden');
+        document.documentElement.classList.remove('overflow-hidden');
+        
+        setTimeout(() => {
+          modal.style.display = 'none';
+          // 允许键盘操作
+          document.removeEventListener('keydown', handleKeyDown);
+        }, 300);
+      }
+      
+      // 阻止背景点击事件冒泡
+      function stopPropagation(event) {
+        event.stopPropagation();
+      }
+      
+      // 处理键盘事件，只允许ESC键关闭弹窗
+      function handleKeyDown(event) {
+        // 只允许ESC键和Tab键在弹窗内导航
+        if (event.key !== 'Escape' && event.key !== 'Tab') {
+          event.preventDefault();
+        }
+        
+        // ESC键关闭弹窗
+        if (event.key === 'Escape') {
+          closeModal();
+        }
+      }
+      
+      // 页面加载完成后显示弹窗并限制交互
+      document.addEventListener('DOMContentLoaded', function() {
+        const modal = document.getElementById('welcomeModal');
+        const modalContent = modal.querySelector('div:not(#closeModalBtn)');
+        const closeBtn = document.getElementById('closeModalBtn');
+        
+        // 禁止页面滚动
+        document.body.classList.add('overflow-hidden');
+        document.documentElement.classList.add('overflow-hidden');
+        
+        // 阻止点击弹窗背景时关闭弹窗
+        modal.addEventListener('click', stopPropagation);
+        modalContent.addEventListener('click', stopPropagation);
+        
+        // 关闭按钮事件
+        closeBtn.addEventListener('click', closeModal);
+        
+        // 添加键盘事件监听，限制键盘操作
+        document.addEventListener('keydown', handleKeyDown);
+        
+        // 设置弹窗为焦点
+        closeBtn.focus();
+        
+        // 禁止右键菜单
+        modal.addEventListener('contextmenu', (e) => e.preventDefault());
+      });
+    </script>
+
+    
+    <!-- 导航栏 -->
+    <header class="fixed w-full top-0 z-50 transition-all duration-300" id="navbar">
+        <div class="container mx-auto px-4 py-3 flex items-center justify-between bg-dark/80 bg-glass border-b border-white/10">
+            <!-- Logo区域 -->
+            <a href="#" class="flex items-center gap-2">
+                <img src="./图片文件/ql.jpeg" alt="清璃俱乐部" class="w-10 h-10 rounded-lg object-cover">
+                <span class="font-display font-bold text-xl truncate">清璃俱乐部</span>
+            </a>
+            
+            <!-- 桌面导航 -->
+            <nav class="hidden md:flex items-center gap-8">
+                <a href="#home" class="text-light/90 hover:text-primary transition-colors">首页</a>
+                <a href="#about" class="text-light/90 hover:text-primary transition-colors">关于清璃</a>
+                <a href="#prices" class="text-light/90 hover:text-primary transition-colors">价格表</a>
+                <a href="#team" class="text-light/90 hover:text-primary transition-colors">门面展示</a>
+                <a href="#recruit" class="text-light/90 hover:text-primary transition-colors">纳新公告</a>
+                <a href="#contact" class="bg-gradient-to-r from-primary to-secondary px-5 py-2 rounded-full hover:shadow-lg hover:shadow-primary/20 transition-all">联系我们</a>
+            </nav>
+            
+            <!-- 移动端菜单按钮 -->
+            <button class="md:hidden text-light text-xl" id="menuBtn">
+                <i class="fa fa-bars"></i>
+            </button>
+        </div>
+        
+        <!-- 移动端导航菜单 -->
+        <div class="md:hidden bg-dark/95 bg-glass w-full absolute top-full left-0 border-b border-white/10 hidden transition-all duration-300" id="mobileMenu">
+            <div class="container mx-auto px-4 py-4 flex flex-col gap-4">
+                <a href="#home" class="text-light/90 hover:text-primary transition-colors py-2">首页</a>
+                <a href="#about" class="text-light/90 hover:text-primary transition-colors py-2">关于清璃</a>
+                <a href="#prices" class="text-light/90 hover:text-primary transition-colors py-2">价格表</a>
+                <a href="#team" class="text-light/90 hover:text-primary transition-colors py-2">门面展示</a>
+                <a href="#recruit" class="text-light/90 hover:text-primary transition-colors py-2">纳新公告</a>
+                <a href="#contact" class="bg-gradient-to-r from-primary to-secondary px-5 py-2 rounded-full text-center hover:shadow-lg hover:shadow-primary/20 transition-all">联系我们</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- 英雄区域 -->
+    <section id="home" class="min-h-screen flex flex-col justify-center items-center pt-24 pb-10 relative overflow-hidden">
+        <!-- 背景装饰 -->
+        <div class="absolute inset-0 z-0">
+            <div class="absolute top-1/4 left-1/4 w-80 h-80 bg-primary/20 rounded-full filter blur-3xl"></div>
+            <div class="absolute bottom-1/4 right-1/4 w-80 h-80 bg-secondary/20 rounded-full filter blur-3xl"></div>
+        </div>
+        
+        <div class="container mx-auto px-4 z-10">
+            <div class="grid md:grid-cols-2 gap-8 md:gap-12 items-center">
+                <div class="space-y-5 md:space-y-6 order-2 md:order-1">
+                    <div class="inline-block bg-primary/10 text-primary px-4 py-1 rounded-full text-sm font-medium"></div>
+                    <h1 class="text-[clamp(2rem,5vw,4rem)] font-display font-bold leading-tight">
+                        <span class="bg-gradient-to-r from-primary to-secondary text-gradient">清璃俱乐部</span><br>
+                        期待每一次相遇，用心陪伴每一次来客
+                    </h1>
+                    <p class="text-light/70 text-base md:text-lg max-w-lg">
+                        陪伴不止于玩耍
+                    </p>
+                    <div class="flex flex-wrap gap-3 md:gap-4 pt-4">
+                        <a href="#prices" class="bg-gradient-to-r from-primary to-secondary px-5 py-3 rounded-full font-medium hover:shadow-lg hover:shadow-primary/20 transition-all text-center flex-1 md:flex-none">查看价格表</a>
+                        <a href="#recruit" class="border border-light/20 px-5 py-3 rounded-full font-medium hover:bg-light/5 transition-all text-center flex-1 md:flex-none">加入我们</a>
+                    </div>
+                    <div class="flex flex-wrap items-center gap-4 md:gap-6 pt-4">
+                        <div class="flex -space-x-2">
+                            <img src="https://picsum.photos/200/200?random=1" alt="用户头像" class="w-9 h-9 rounded-full border-2 border-dark">
+                            <img src="https://picsum.photos/200/200?random=2" alt="用户头像" class="w-9 h-9 rounded-full border-2 border-dark">
+                            <img src="https://picsum.photos/200/200?random=3" alt="用户头像" class="w-9 h-9 rounded-full border-2 border-dark">
+                            <div class="w-9 h-9 rounded-full border-2 border-dark bg-primary/20 flex items-center justify-center text-xs font-medium">99+</div>
+                        </div>
+                        <div class="text-light/70 text-sm">
+                            <span class="text-primary font-bold">0</span> 差评
+                        </div>
+                        <div class="text-light/70 text-sm">
+                            <span class="text-primary font-bold">20+</span> 成功订单
+                        </div>
+                    </div>
+                </div>
+                <div class="relative order-1 md:order-2">
+                    <div class="aspect-square rounded-2xl overflow-hidden bg-gradient-to-br from-dark/80 to-dark/40 border border-white/10 shadow-xl hover-scale">
+                        <img src="./图片文件/第一主图.jpeg" alt="QL CLUB主图" class="w-full h-full object-cover">
+                    </div>
+                    <!-- 装饰元素 - 移动端调整位置避免溢出 -->
+                    <div class="absolute -top-4 -left-4 bg-dark border border-white/10 rounded-xl p-3 shadow-lg hover-scale">
+                        <div class="flex items-center gap-2">
+                            <div class="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center text-primary">
+                                <i class="fa fa-trophy"></i>
+                            </div>
+                            <div>
+                                <div class="text-light/90 font-medium text-sm">情绪价值</div>
+                                <div class="text-light/60 text-xs">100%+</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="absolute -bottom-4 -right-4 bg-dark border border-white/10 rounded-xl p-3 shadow-lg hover-scale">
+                        <div class="flex items-center gap-2">
+                            <div class="w-10 h-10 rounded-full bg-secondary/20 flex items-center justify-center text-secondary">
+                                <i class="fa fa-clock-o"></i>
+                            </div>
+                            <div>
+                                <div class="text-light/90 font-medium text-sm">有求必应</div>
+                                <div class="text-light/60 text-xs">20分钟内</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 关于清璃 -->
+    <section id="about" class="py-16 md:py-20 bg-gradient-to-b from-dark to-dark/90">
+        <div class="container mx-auto px-4">
+            <div class="text-center max-w-2xl mx-auto mb-12 md:mb-16">
+                <div class="inline-block bg-primary/10 text-primary px-4 py-1 rounded-full text-sm font-medium mb-4"></div>
+                <h2 class="text-[clamp(1.5rem,3vw,2.5rem)] font-display font-bold mb-4">清璃俱乐部 - 用心打造顶尖的陪伴</h2>
+                <p class="text-light/70">我们致力于为提供最细致的服务，最多元的体验</p>
+            </div>
+            
+            <div class="grid md:grid-cols-2 gap-8 md:gap-12 items-center">
+                <div class="relative">
+                    <div class="aspect-video rounded-2xl overflow-hidden bg-gradient-to-br from-dark/80 to-dark/40 border border-white/10 shadow-xl">
+                        <img src="./图片文件/第三主图.jpg" alt="QL CLUB团队" class="w-full h-full object-cover">
+                    </div>
+                    <!-- 装饰元素 -->
+                    <div class="absolute -bottom-4 -left-4 bg-dark border border-white/10 rounded-xl p-3 shadow-lg max-w-xs hover-scale">
+                        <div class="flex items-center gap-2">
+                            <div class="w-9 h-9 rounded-full bg-accent/20 flex items-center justify-center text-accent">
+                                <i class="fa fa-users"></i>
+                            </div>
+                            <div>
+                                <div class="text-light/90 font-medium text-sm">专业团队</div>
+                                <div class="text-light/60 text-xs line-clamp-1">严格筛选，确保高质量</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="space-y-5">
+                    <h3 class="text-xl md:text-2xl font-display font-bold">我们的故事</h3>
+                    <p class="text-light/70 text-sm md:text-base">
+                        清璃俱乐部成立于2025年，由一群热忱的00后组成。我们提供如王者荣耀、超自然行动组、第五人格、和平精英等热门游戏陪伴服务，以及语音、文字的聊天陪伴服务
+                    </p>
+                    
+                    <h3 class="text-xl md:text-2xl font-display font-bold">我们的理念</h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div class="bg-dark/50 border border-white/10 rounded-xl p-5 hover-scale">
+                            <div class="text-primary text-2xl mb-3">
+                                <i class="fa fa-star"></i>
+                            </div>
+                            <h4 class="font-bold mb-2">专业至上</h4>
+                            <p class="text-light/70 text-sm">所有陪玩都严格遵循章程，确保服务质量</p>
+                        </div>
+                        <div class="bg-dark/50 border border-white/10 rounded-xl p-5 hover-scale">
+                            <div class="text-secondary text-2xl mb-3">
+                                <i class="fa fa-heart"></i>
+                            </div>
+                            <h4 class="font-bold mb-2">客户第一</h4>
+                            <p class="text-light/70 text-sm">以客户需求为导向，提供个性化定制服务</p>
+                        </div>
+                        <div class="bg-dark/50 border border-white/10 rounded-xl p-5 hover-scale">
+                            <div class="text-accent text-2xl mb-3">
+                                <i class="fa fa-shield"></i>
+                            </div>
+                            <h4 class="font-bold mb-2">安全可靠</h4>
+                            <p class="text-light/70 text-sm">严格的安全保障措施，保护客户隐私和权益</p>
+                        </div>
+                        <div class="bg-dark/50 border border-white/10 rounded-xl p-5 hover-scale">
+                            <div class="text-green-500 text-2xl mb-3">
+                                <i class="fa fa-rocket"></i>
+                            </div>
+                            <h4 class="font-bold mb-2">持续创新</h4>
+                            <p class="text-light/70 text-sm">不断优化服务流程，提升用户体验</p>
+                        </div>
+                    </div>
+                    
+                    <div class="pt-4">
+                        <a href="#contact" class="inline-flex items-center gap-2 text-primary hover:text-primary/80 transition-colors">
+                            了解更多 <i class="fa fa-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 价格表 -->
+    <section id="prices" class="py-20 bg-gradient-to-b from-dark/90 to-dark">
+        <div class="container mx-auto px-4">
+            <div class="text-center max-w-2xl mx-auto mb-16">
+                <div class="inline-block bg-primary/10 text-primary px-4 py-1 rounded-full text-sm font-medium mb-4"></div>
+                <h2 class="text-[clamp(1.8rem,3vw,2.5rem)] font-display font-bold mb-4">透明定价，物超所值</h2>
+                <p class="text-light/70">我们提供多种服务，满足不同需求，价格公开透明，业务持续更新</p>
+            </div>
+            
+            <!-- 游戏竞技区 -->
+            <div class="mb-16">
+                <h3 class="text-2xl font-display font-bold mb-8 text-center">游戏竞技区</h3>
+                <div class="grid md:grid-cols-3 gap-8">
+                    <!-- 王者娱乐 -->
+                    <div class="bg-dark/50 border border-white/10 rounded-2xl overflow-hidden hover-scale">
+                        <div class="p-6 border-b border-white/10">
+                            <h4 class="font-display font-bold text-xl mb-2">王者娱乐</h4>
+                            <p class="text-light/70 text-sm">轻松愉快的游戏体验</p>
+                        </div>
+                        <div class="p-6">
+                            <div class="flex items-end gap-2 mb-6">
+                                <span class="text-3xl font-bold">¥9.99</span>
+                                <span class="text-light/70 text-sm">/把</span>
+                            </div>
+                            <div class="flex items-end gap-2 mb-6">
+                                <span class="text-3xl font-bold">¥35</span>
+                                <span class="text-light/70 text-sm">/小时</span>
+                            </div>
+                            <ul class="space-y-3 mb-8">
+                                <li class="flex items-start gap-3">
+                                    <i class="fa fa-check text-green-500 mt-1"></i>
+                                    <span class="text-light/80">休闲娱乐陪玩</span>
+                                </li>
+                                <li class="flex items-start gap-3">
+                                    <i class="fa fa-check text-green-500 mt-1"></i>
+                                    <span class="text-light/80">游戏氛围带动</span>
+                                </li>
+                                <li class="flex items-start gap-3">
+                                    <i class="fa fa-check text-green-500 mt-1"></i>
+                                    <span class="text-light/80">聊天互动</span>
+                                </li>
+                            </ul>
+                            <a href="#contact" class="block w-full py-3 text-center border border-primary text-primary rounded-lg hover:bg-primary/5 transition-colors">立即咨单</a>
+                        </div>
+                    </div>
+                    
+                    <!-- 王者技术 -->
+                    <div class="bg-dark/50 border border-primary/30 rounded-2xl overflow-hidden hover-scale shadow-lg shadow-primary/10 transform md:scale-105 z-10">
+                        <div class="bg-primary/10 p-6 border-b border-primary/30">
+                            <h4 class="font-display font-bold text-xl mb-2">王者技术</h4>
+                            <p class="text-light/70 text-sm">专业技术，高效上分</p>
+                        </div>
+                        <div class="p-6">
+                            <div class="flex items-end gap-2 mb-6">
+                                <span class="text-3xl font-bold">¥14</span>
+                                <span class="text-light/70 text-sm">/把</span>
+                            </div>
+                            <div class="flex items-end gap-2 mb-6">
+                                <span class="text-3xl font-bold">¥45</span>
+                                <span class="text-light/70 text-sm">/小时</span>
+                            </div>
+                            <ul class="space-y-3 mb-8">
+                                <li class="flex items-start gap-3">
+                                    <i class="fa fa-check text-green-500 mt-1"></i>
+                                    <span class="text-light/80">包C不包赢</span>
+                                </li>
+                                <li class="flex items-start gap-3">
+                                    <i class="fa fa-check text-green-500 mt-1"></i>
+                                    <span class="text-light/80">技术指导</span>
+                                </li>
+                                <li class="flex items-start gap-3">
+                                    <i class="fa fa-check text-green-500 mt-1"></i>
+                                    <span class="text-light/80">战术分析</span>
+                                </li>
+                            </ul>
+                            <a href="#contact" class="block w-full py-3 text-center bg-primary rounded-lg hover:bg-primary/90 transition-colors">立即咨单</a>
+                        </div>
+                    </div>
+                    
+                    <!-- 王者娱技 -->
+                    <div class="bg-dark/50 border border-white/10 rounded-2xl overflow-hidden hover-scale">
+                        <div class="p-6 border-b border-white/10">
+                            <h4 class="font-display font-bold text-xl mb-2">王者娱技</h4>
+                            <p class="text-light/70 text-sm">技术与娱乐的完美结合</p>
+                        </div>
+                        <div class="p-6">
+                            <div class="flex items-end gap-2 mb-6">
+                                <span class="text-3xl font-bold">¥16</span>
+                                <span class="text-light/70 text-sm">/把</span>
+                            </div>
+                            <div class="flex items-end gap-2 mb-6">
+                                <span class="text-3xl font-bold">¥52</span>
+                                <span class="text-light/70 text-sm">/小时</span>
+                            </div>
+                            <ul class="space-y-3 mb-8">
+                                <li class="flex items-start gap-3">
+                                    <i class="fa fa-check text-green-500 mt-1"></i>
+                                    <span class="text-light/80">包C不包赢</span>
+                                </li>
+                                <li class="flex items-start gap-3">
+                                    <i class="fa fa-check text-green-500 mt-1"></i>
+                                    <span class="text-light/80">娱乐氛围</span>
+                                </li>
+                                <li class="flex items-start gap-3">
+                                    <i class="fa fa-check text-green-500 mt-1"></i>
+                                    <span class="text-light/80">技术支持</span>
+                                </li>
+                            </ul>
+                            <a href="#contact" class="block w-full py-3 text-center border border-primary text-primary rounded-lg hover:bg-primary/5 transition-colors">立即咨单</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 段位价格表 -->
+            <div class="mb-16">
+                <h3 class="text-2xl font-display font-bold mb-8 text-center">代打段位价格表</h3>
+                <div class="bg-dark/50 border border-white/10 rounded-2xl p-6 overflow-hidden">
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <div class="bg-dark border border-white/10 rounded-lg p-4 text-center hover-scale">
+                            <h4 class="font-bold mb-2">青铜</h4>
+                            <p class="text-2xl font-bold text-primary">¥2<span class="text-sm text-light/70">/颗星</span></p>
+                        </div>
+                        <div class="bg-dark border border-white/10 rounded-lg p-4 text-center hover-scale">
+                            <h4 class="font-bold mb-2">白银</h4>
+                            <p class="text-2xl font-bold text-primary">¥3<span class="text-sm text-light/70">/颗星</span></p>
+                        </div>
+                        <div class="bg-dark border border-white/10 rounded-lg p-4 text-center hover-scale">
+                            <h4 class="font-bold mb-2">黄金</h4>
+                            <p class="text-2xl font-bold text-primary">¥4<span class="text-sm text-light/70">/颗星</span></p>
+                        </div>
+                        <div class="bg-dark border border-white/10 rounded-lg p-4 text-center hover-scale">
+                            <h4 class="font-bold mb-2">铂金</h4>
+                            <p class="text-2xl font-bold text-primary">¥5<span class="text-sm text-light/70">/颗星</span></p>
+                        </div>
+                        <div class="bg-dark border border-white/10 rounded-lg p-4 text-center hover-scale">
+                            <h4 class="font-bold mb-2">钻石</h4>
+                            <p class="text-2xl font-bold text-primary">¥6<span class="text-sm text-light/70">/颗星</span></p>
+                        </div>
+                        <div class="bg-dark border border-white/10 rounded-lg p-4 text-center hover-scale">
+                            <h4 class="font-bold mb-2">星耀</h4>
+                            <p class="text-2xl font-bold text-primary">¥7<span class="text-sm text-light/70">/颗星</span></p>
+                        </div>
+                        <div class="bg-dark border border-white/10 rounded-lg p-4 text-center hover-scale">
+                            <h4 class="font-bold mb-2">王者</h4>
+                            <p class="text-2xl font-bold text-primary">¥8<span class="text-sm text-light/70">/颗星</span></p>
+                        </div>
+                        <div class="bg-dark border border-white/10 rounded-lg p-4 text-center hover-scale">
+                            <h4 class="font-bold mb-2">非凡</h4>
+                            <p class="text-2xl font-bold text-primary">¥9<span class="text-sm text-light/70">/颗星</span></p>
+                        </div>
+                        <div class="bg-dark border border-white/10 rounded-lg p-4 text-center hover-scale">
+                            <h4 class="font-bold mb-2">无双</h4>
+                            <p class="text-2xl font-bold text-primary">¥10<span class="text-sm text-light/70">/颗星</span></p>
+                        </div>
+                        <div class="bg-dark border border-white/10 rounded-lg p-4 text-center hover-scale">
+                            <h4 class="font-bold mb-2">绝世</h4>
+                            <p class="text-2xl font-bold text-primary">¥11<span class="text-sm text-light/70">/颗星</span></p>
+                        </div>
+                        <div class="bg-dark border border-white/10 rounded-lg p-4 text-center hover-scale">
+                            <h4 class="font-bold mb-2">至圣</h4>
+                            <p class="text-2xl font-bold text-primary">¥12<span class="text-sm text-light/70">/颗星</span></p>
+                        </div>
+                        <div class="bg-dark border border-white/10 rounded-lg p-4 text-center hover-scale">
+                            <h4 class="font-bold mb-2">荣耀</h4>
+                            <p class="text-2xl font-bold text-primary">¥13<span class="text-sm text-light/70">/颗星</span></p>
+                        </div>
+                    </div>
+                    <div class="mt-6 grid grid-cols-2 gap-4">
+                        <div class="bg-dark border border-white/10 rounded-lg p-4 text-center hover-scale">
+                            <h4 class="font-bold mb-2">60-70星</h4>
+                            <p class="text-2xl font-bold text-primary">¥14<span class="text-sm text-light/70">/颗星</span></p>
+                        </div>
+                        <div class="bg-dark border border-white/10 rounded-lg p-4 text-center hover-scale">
+                            <h4 class="font-bold mb-2">70-80星</h4>
+                            <p class="text-2xl font-bold text-primary">¥16<span class="text-sm text-light/70">/颗星</span></p>
+                        </div>
+                        <div class="bg-dark border border-white/10 rounded-lg p-4 text-center hover-scale">
+                            <h4 class="font-bold mb-2">80-90星</h4>
+                            <p class="text-2xl font-bold text-primary">¥17<span class="text-sm text-light/70">/颗星</span></p>
+                        </div>
+                        <div class="bg-dark border border-white/10 rounded-lg p-4 text-center hover-scale">
+                            <h4 class="font-bold mb-2">90-100星</h4>
+                            <p class="text-2xl font-bold text-primary">¥20<span class="text-sm text-light/70">/颗星</span></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- QL CLUB价格表 -->
+            <div class="mb-16">
+                <h3 class="text-2xl font-display font-bold mb-8 text-center"></h3>
+                
+                <!-- 蛋仔价格 -->
+                <div class="mb-8 bg-dark/50 border border-white/10 rounded-2xl p-6 overflow-hidden">
+                    <h4 class="font-display font-bold text-xl mb-6 text-center">蛋仔价格表</h4>
+                    <div class="grid md:grid-cols-3 gap-6">
+                        <div class="bg-dark border border-white/10 rounded-xl p-5 text-center hover-scale">
+                            <h5 class="font-medium mb-3">一陪一</h5>
+                            <div class="space-y-2">
+                                <p class="text-lg">12元 / 小时</p>
+                                <p class="text-lg">13元 / 小时</p>
+                            </div>
+                        </div>
+                        <div class="bg-dark border border-white/10 rounded-xl p-5 text-center hover-scale">
+                            <h5 class="font-medium mb-3">二陪一</h5>
+                            <p class="text-lg">20元 / 小时</p>
+                        </div>
+                        <div class="bg-dark border border-white/10 rounded-xl p-5 text-center hover-scale">
+                            <h5 class="font-medium mb-3">三陪一</h5>
+                            <div class="space-y-2">
+                                <p class="text-lg">25元 / 小时</p>
+                                <p class="text-lg">3元 / 把</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-6 grid grid-cols-3 gap-4">
+                        <div class="bg-dark border border-white/10 rounded-xl p-4 text-center hover-scale">
+                            <p class="text-lg">青铜到恐龙蛋</p>
+                            <p class="text-xl font-bold text-primary">2元 / 把</p>
+                        </div>
+                        <div class="bg-dark border border-white/10 rounded-xl p-4 text-center hover-scale">
+                            <p class="text-lg">凤凰蛋</p>
+                            <p class="text-xl font-bold text-primary">3元 / 把</p>
+                        </div>
+                        <div class="bg-dark border border-white/10 rounded-xl p-4 text-center hover-scale">
+                            <p class="text-lg">超级凤凰蛋</p>
+                            <p class="text-xl font-bold text-primary">4元 / 把</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 和平价格 -->
+                <div class="mb-8 bg-dark/50 border border-white/10 rounded-2xl p-6 overflow-hidden">
+                    <h4 class="font-display font-bold text-xl mb-6 text-center">和平精英价格表</h4>
+                    <div class="grid md:grid-cols-3 gap-6">
+                        <div class="bg-dark border border-white/10 rounded-xl p-5 text-center hover-scale">
+                            <h5 class="font-medium mb-3">娱乐</h5>
+                            <div class="space-y-2">
+                                <p class="text-lg">11元 / 局</p>
+                                <p class="text-lg">30元 / 小时</p>
+                            </div>
+                        </div>
+                        <div class="bg-dark border border-white/10 rounded-xl p-5 text-center hover-scale">
+                            <h5 class="font-medium mb-3">技术</h5>
+                            <div class="space-y-2">
+                                <p class="text-lg">星钻：12元 / 局，35元 / 小时</p>
+                                <p class="text-lg">皇冠：14元 / 局，40元 / 小时</p>
+                            </div>
+                        </div>
+                        <div class="bg-dark border border-white/10 rounded-xl p-5 text-center hover-scale">
+                            <h5 class="font-medium mb-3">王牌</h5>
+                            <div class="space-y-2">
+                                <p class="text-lg">王牌：16元 / 局，45元 / 小时</p>
+                                <p class="text-lg">绝世王牌：18元 / 局，50元 / 小时</p>
+                                <p class="text-lg">传奇王牌：20元 / 局，55元 / 小时</p>
+                                <p class="text-lg">战神：23元 / 局，60元 / 小时</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 下单须知 -->
+                <div class="bg-dark/50 border border-white/10 rounded-2xl p-6 overflow-hidden">
+                    <h4 class="font-display font-bold text-xl mb-6 text-center">下单须知</h4>
+                    <div class="bg-dark border border-white/10 rounded-xl p-5 text-center">
+                        <p class="mb-4 text-light/90">点单/存单/续单/提单请联系派单员</p>
+                        <p class="mb-4 text-light/90">存单有效期限为7日，发现异常或投诉请及时联系管理员</p>
+                        <div class="mt-6">
+                            <p class="text-light/70">在线时间: 周一至周日 8:00~24:00</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 陪伴娱乐区 -->
+            <div class="mb-16">
+                <h3 class="text-2xl font-display font-bold mb-8 text-center">陪伴娱乐区</h3>
+                <div class="grid md:grid-cols-2 gap-8">
+                    <div class="bg-dark/50 border border-white/10 rounded-2xl p-6 overflow-hidden hover-scale">
+                        <h4 class="font-display font-bold text-xl mb-6">聊天陪伴服务</h4>
+                        <div class="space-y-6">
+                            <div class="flex justify-between items-center">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center text-primary">
+                                        <i class="fa fa-moon-o"></i>
+                                    </div>
+                                    <span class="font-medium">哄睡语聊</span>
+                                </div>
+                                <span class="text-xl font-bold">¥45<span class="text-sm text-light/70">/小时</span></span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-10 h-10 rounded-full bg-secondary/20 flex items-center justify-center text-secondary">
+                                        <i class="fa fa-comment"></i>
+                                    </div>
+                                    <span class="font-medium">文聊</span>
+                                </div>
+                                <span class="text-xl font-bold">¥40<span class="text-sm text-light/70">/小时</span></span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-dark/50 border border-white/10 rounded-2xl p-6 overflow-hidden hover-scale">
+                        <h4 class="font-display font-bold text-xl mb-6">其他服务</h4>
+                        <div class="space-y-6">
+                            <div class="flex justify-between items-center">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-10 h-10 rounded-full bg-accent/20 flex items-center justify-center text-accent">
+                                        <i class="fa fa-music"></i>
+                                    </div>
+                                    <span class="font-medium">歌单</span>
+                                </div>
+                                <span class="text-xl font-bold">¥9<span class="text-sm text-light/70">/首</span> / ¥5<span class="text-sm text-light/70">/片段</span></span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-10 h-10 rounded-full bg-green-500/20 flex items-center justify-center text-green-500">
+                                        <i class="fa fa-microphone"></i>
+                                    </div>
+                                    <span class="font-medium">语音条拉满</span>
+                                </div>
+                                <span class="text-xl font-bold">¥10<span class="text-sm text-light/70">/单</span></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 胃袋价格表 -->
+            <div class="mb-16">
+                <h3 class="text-2xl font-display font-bold mb-8 text-center">超自然行动组胃袋价格表</h3>
+                <div class="bg-dark/50 border border-white/10 rounded-2xl p-6 overflow-hidden">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="bg-dark border border-white/10 rounded-lg p-6 hover-scale">
+                            <h4 class="font-bold text-xl mb-4">迷你胃袋</h4>
+                            <div class="flex items-end gap-2 mb-4">
+                                <span class="text-3xl font-bold">¥6</span>
+                                <span class="text-light/70">/70万</span>
+                            </div>
+                        </div>
+                        <div class="bg-dark border border-white/10 rounded-lg p-6 hover-scale">
+                            <h4 class="font-bold text-xl mb-4">小胃袋</h4>
+                            <div class="flex items-end gap-2 mb-4">
+                                <span class="text-3xl font-bold">¥15</span>
+                                <span class="text-light/70">/100万 (无保底)</span>
+                            </div>
+                        </div>
+                        <div class="bg-dark border border-white/10 rounded-lg p-6 hover-scale">
+                            <h4 class="font-bold text-xl mb-4">中胃袋</h4>
+                            <div class="flex items-end gap-2 mb-4">
+                                <span class="text-3xl font-bold">¥20</span>
+                                <span class="text-light/70">/150万 (无保底)</span>
+                            </div>
+                        </div>
+                        <div class="bg-dark border border-white/10 rounded-lg p-6 hover-scale">
+                            <h4 class="font-bold text-xl mb-4">大胃袋</h4>
+                            <div class="flex items-end gap-2 mb-4">
+                                <span class="text-3xl font-bold">¥30</span>
+                                <span class="text-light/70">/200万 (保底2000万)</span>
+                            </div>
+                        </div>
+                        
+                        <!-- 重要提示 -->
+                        <div class="md:col-span-2 bg-red-500/20 border-2 border-red-500 rounded-lg p-4 text-center mt-6 animate-pulse">
+                            <p class="text-xl font-bold text-white">所有胃袋订单，爆出圣杯需额外支付15元补价</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 特殊礼物价格表 -->
+            <div class="mb-16">
+                <h3 class="text-2xl font-display font-bold mb-8 text-center">礼物价格表</h3>
+                <div class="grid md:grid-cols-2 gap-8">
+                    <!-- 普通礼物 -->
+                    <div class="bg-dark/50 border border-white/10 rounded-2xl p-6 overflow-hidden hover-scale">
+                        <h4 class="font-display font-bold text-xl mb-6">普通礼物</h4>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="bg-dark border border-white/10 rounded-lg p-4 text-center hover-scale">
+                                <h5 class="font-medium mb-2">蓝水晶</h5>
+                                <p class="text-xl font-bold text-primary">¥3</p>
+                            </div>
+                            <div class="bg-dark border border-white/10 rounded-lg p-4 text-center hover-scale">
+                                <h5 class="font-medium mb-2">绿水晶</h5>
+                                <p class="text-xl font-bold text-primary">¥5</p>
+                            </div>
+                            <div class="bg-dark border border-white/10 rounded-lg p-4 text-center hover-scale">
+                                <h5 class="font-medium mb-2">黄水晶</h5>
+                                <p class="text-xl font-bold text-primary">¥5</p>
+                            </div>
+                            <div class="bg-dark border border-white/10 rounded-lg p-4 text-center hover-scale">
+                                <h5 class="font-medium mb-2">粉水晶</h5>
+                                <p class="text-xl font-bold text-primary">¥10</p>
+                            </div>
+                            <div class="bg-dark border border-white/10 rounded-lg p-4 text-center hover-scale">
+                                <h5 class="font-medium mb-2">紫水晶</h5>
+                                <p class="text-xl font-bold text-primary">¥15</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 特殊礼物 -->
+                    <div class="bg-dark/50 border border-white/10 rounded-2xl p-6 overflow-hidden hover-scale">
+                        <h4 class="font-display font-bold text-xl mb-6">特殊礼物</h4>
+                        <div class="space-y-4">
+                            <div class="bg-dark border border-white/10 rounded-lg p-4 hover-scale">
+                                <div class="flex justify-between items-center">
+                                    <div>
+                                        <h5 class="font-medium">摘怪水晶</h5>
+                                        <p class="text-light/70 text-sm">换指定头像</p>
+                                    </div>
+                                    <p class="text-xl font-bold text-primary">¥20</p>
+                                </div>
+                            </div>
+                            <div class="bg-dark border border-white/10 rounded-lg p-4 hover-scale">
+                                <div class="flex justify-between items-center">
+                                    <div>
+                                        <h5 class="font-medium">撒娇八连</h5>
+                                        <p class="text-light/70 text-sm">用夹唱音长撒娇八连</p>
+                                    </div>
+                                    <p class="text-xl font-bold text-primary">¥25</p>
+                                </div>
+                            </div>
+                            <div class="bg-dark border border-white/10 rounded-lg p-4 hover-scale">
+                                <div class="flex justify-between items-center">
+                                    <div>
+                                        <h5 class="font-medium">大喇叭</h5>
+                                        <p class="text-light/70 text-sm">一天用发语音的方式讲话</p>
+                                    </div>
+                                    <p class="text-xl font-bold text-primary">¥30</p>
+                                </div>
+                            </div>
+                            <div class="bg-dark border border-white/10 rounded-lg p-4 hover-scale">
+                                <div class="flex justify-between items-center">
+                                    <div>
+                                        <h5 class="font-medium">表白信</h5>
+                                        <p class="text-light/70 text-sm">手写400字表白信并读出来</p>
+                                    </div>
+                                    <p class="text-xl font-bold text-primary">¥35</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 甜蜜礼物单 -->
+            <div class="mb-16">
+                <h3 class="text-2xl font-display font-bold mb-8 text-center">甜蜜礼物单</h3>
+                <div class="grid md:grid-cols-3 gap-6">
+                    <div class="bg-dark/50 border border-white/10 rounded-2xl p-6 overflow-hidden text-center hover-scale">
+                        <div class="w-20 h-20 mx-auto mb-4 bg-primary/10 rounded-full flex items-center justify-center">
+                            <i class="fa fa-birthday-cake text-3xl text-primary"></i>
+                        </div>
+                        <h4 class="font-display font-bold text-xl mb-2">小蛋糕</h4>
+                        <p class="text-2xl font-bold text-primary mb-2">¥5</p>
+                    </div>
+                    <div class="bg-dark/50 border border-white/10 rounded-2xl p-6 overflow-hidden text-center hover-scale">
+                        <div class="w-20 h-20 mx-auto mb-4 bg-secondary/10 rounded-full flex items-center justify-center">
+                            <i class="fa fa-gift text-3xl text-secondary"></i>
+                        </div>
+                        <h4 class="font-display font-bold text-xl mb-2">兔子玩偶</h4>
+                        <p class="text-2xl font-bold text-primary mb-2">¥10</p>
+                    </div>
+                    <div class="bg-dark/50 border border-white/10 rounded-2xl p-6 overflow-hidden text-center hover-scale">
+                        <div class="w-20 h-20 mx-auto mb-4 bg-accent/10 rounded-full flex items-center justify-center">
+                            <i class="fa fa-camera text-3xl text-accent"></i>
+                        </div>
+                        <h4 class="font-display font-bold text-xl mb-2">照相机</h4>
+                        <p class="text-2xl font-bold text-primary mb-2">¥30</p>
+                    </div>
+                </div>
+                <div class="text-center mt-6">
+                    <p class="text-light/70">赠送全套周星礼可获得群冠1周</p>
+                </div>
+            </div>
+            
+            <!-- 附加费用说明 -->
+            <div class="mb-12">
+                <!-- 特殊框架样式 -->
+                <div class="relative overflow-hidden rounded-xl">
+                    <!-- 渐变背景 -->
+                    <div class="absolute inset-0 bg-gradient-to-r from-primary/30 to-secondary/30 animate-pulse"></div>
+                    
+                    <!-- 发光边框容器 -->
+                    <div class="relative border-2 border-primary/50 rounded-xl shadow-lg shadow-primary/20 p-6 bg-dark/80 backdrop-blur-sm transform hover:scale-[1.01] transition-transform duration-300">
+                        <!-- 标题带有发光效果 -->
+                        <h4 class="font-bold mb-6 text-xl text-center text-primary drop-shadow-[0_0_10px_rgba(255,255,255,0.3)]">
+                            💰 附加费用说明 💰
+                        </h4>
+                        
+                        <!-- 费用标签带有悬停效果 -->
+                        <div class="flex flex-wrap justify-center gap-6 mb-6">
+                            <div class="relative group">
+                                <span class="bg-gradient-to-r from-primary/20 to-secondary/20 border border-primary/40 px-6 py-3 rounded-full text-sm font-medium inline-block relative z-10 group-hover:scale-105 transition-transform">
+                                    甜蜜单 <span class="text-green-400">+¥5</span>
+                                </span>
+                                <span class="absolute inset-0 bg-gradient-to-r from-primary/40 to-secondary/40 rounded-full opacity-0 group-hover:opacity-100 transition-opacity blur-sm"></span>
+                            </div>
+                            <div class="relative group">
+                                <span class="bg-gradient-to-r from-primary/20 to-secondary/20 border border-primary/40 px-6 py-3 rounded-full text-sm font-medium inline-block relative z-10 group-hover:scale-105 transition-transform">
+                                    指定 <span class="text-green-400">+¥3</span>
+                                </span>
+                                <span class="absolute inset-0 bg-gradient-to-r from-primary/40 to-secondary/40 rounded-full opacity-0 group-hover:opacity-100 transition-opacity blur-sm"></span>
+                            </div>
+                            <div class="relative group">
+                                <span class="bg-gradient-to-r from-primary/20 to-secondary/20 border border-primary/40 px-6 py-3 rounded-full text-sm font-medium inline-block relative z-10 group-hover:scale-105 transition-transform">
+                                    凌晨 <span class="text-green-400">+¥3</span>
+                                </span>
+                                <span class="absolute inset-0 bg-gradient-to-r from-primary/40 to-secondary/40 rounded-full opacity-0 group-hover:opacity-100 transition-opacity blur-sm"></span>
+                            </div>
+                            <div class="relative group">
+                                <span class="bg-gradient-to-r from-primary/20 to-secondary/20 border border-primary/40 px-6 py-3 rounded-full text-sm font-medium inline-block relative z-10 group-hover:scale-105 transition-transform">
+                                    指定英雄 <span class="text-green-400">+¥3</span>
+                                </span>
+                                <span class="absolute inset-0 bg-gradient-to-r from-primary/40 to-secondary/40 rounded-full opacity-0 group-hover:opacity-100 transition-opacity blur-sm"></span>
+                            </div>
+                        </div>
+                        
+                        <!-- 优惠信息和预约按钮上下平行显示 -->
+                        <div class="flex flex-col items-center gap-6">
+                            <div class="bg-gradient-to-r from-green-500/20 to-blue-500/20 border border-green-500/40 rounded-lg p-4 w-full max-w-md text-center">
+                                <p class="font-medium text-light flex items-center justify-center gap-2">
+                                    <i class="fa fa-gift text-green-400"></i>
+                                    满25元送一把娱技
+                                </p>
+                            </div>
+                            <a href="#contact" class="inline-flex items-center gap-2 bg-gradient-to-r from-primary to-secondary px-6 py-3 rounded-full font-medium hover:shadow-lg hover:shadow-primary/20 transition-all w-full max-w-md justify-center">
+                                立即咨单 <i class="fa fa-arrow-right"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mt-12 text-center">
+                <p class="text-light/70 mb-4">点单/存单/续单/提单请联系派单员</p>
+                <p class="text-light/70 mb-6">在线时间: 周一至周日 8:00-24:00</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- 门面展示 -->
+    <section id="team" class="py-20 bg-gradient-to-b from-dark to-dark/90">
+        <div class="container mx-auto px-4">
+            <div class="text-center max-w-2xl mx-auto mb-16">
+                <div class="inline-block bg-primary/10 text-primary px-4 py-1 rounded-full text-sm font-medium mb-4"></div>
+                <h2 class="text-[clamp(1.8rem,3vw,2.5rem)] font-display font-bold mb-4">清璃三大门牌</h2>
+                <p class="text-light/70">我们拥有一批技术精湛、服务优质的顶尖成员，他们是清璃的门面担当！！！</p>
+            </div>
+            
+            <div class="grid md:grid-cols-3 gap-8">
+                <!-- 陪玩1 -->
+                <div class="bg-dark/50 border border-white/10 rounded-2xl overflow-hidden hover-scale">
+                    <div class="p-6 text-center">
+                        <div class="w-24 h-24 rounded-full overflow-hidden mx-auto mb-4 border-2 border-primary">
+                            <img src="./图片文件/pw2.jpg" alt="陪玩头像" class="w-full h-full object-cover">
+                        </div>
+                        <h3 class="font-display font-bold text-xl mb-1">【清璃】张张</h3>
+                        <p class="text-primary font-medium mb-4">主业务：超自然行动组</p>
+                        <div class="flex justify-center gap-3 mb-6">
+                            <span class="bg-primary/10 text-primary text-xs px-3 py-1 rounded-full">娱乐陪</span>
+                            <span class="bg-secondary/10 text-secondary text-xs px-3 py-1 rounded-full">活泼可爱</span>
+                        </div>
+                        <p class="text-light/70 text-sm mb-6">口头禅：信不信我打四你&我没招了</p>
+                        <a href="#contact" class="inline-block py-2 px-6 border border-primary text-primary rounded-lg hover:bg-primary/5 transition-colors">立即咨单</a>
+                    </div>
+                </div>
+                
+                <!-- 陪玩2 -->
+                <div class="bg-dark/50 border border-white/10 rounded-2xl overflow-hidden hover-scale">
+                    <div class="p-6 text-center">
+                        <div class="w-24 h-24 rounded-full overflow-hidden mx-auto mb-4 border-2 border-secondary">
+                            <img src="./图片文件/pw1.jpg" alt="陪玩头像" class="w-full h-full object-cover">
+                        </div>
+                        <h3 class="font-display font-bold text-xl mb-1">【清璃】酸奶包</h3>
+                        <p class="text-secondary font-medium mb-4">主业务：王者荣耀</p>
+                        <div class="flex justify-center gap-3 mb-6">
+                            <span class="bg-secondary/10 text-secondary text-xs px-3 py-1 rounded-full">娱乐陪</span>
+                            <span class="bg-accent/10 text-accent text-xs px-3 py-1 rounded-full">幽默风趣</span>
+                        </div>
+                        <p class="text-light/70 text-sm mb-6">口头禅：老抽的抽是抽象的抽</p>
+                        <a href="#contact" class="inline-block py-2 px-6 border border-secondary text-secondary rounded-lg hover:bg-secondary/5 transition-colors">立即咨单</a>
+                    </div>
+                </div>
+                
+                <!-- 陪玩3 -->
+                <div class="bg-dark/50 border border-white/10 rounded-2xl overflow-hidden hover-scale">
+                    <div class="p-6 text-center">
+                        <div class="w-24 h-24 rounded-full overflow-hidden mx-auto mb-4 border-2 border-accent">
+                            <img src="./图片文件/pw4.jpg" alt="陪玩头像" class="w-full h-full object-cover">
+                        </div>
+                        <h3 class="font-display font-bold text-xl mb-1">【清璃】蓝桉</h3>
+                        <p class="text-accent font-medium mb-4">主业务：王者荣耀</p>
+                        <div class="flex justify-center gap-3 mb-6">
+                            <span class="bg-accent/10 text-accent text-xs px-3 py-1 rounded-full">娱乐陪</span>
+                            <span class="bg-primary/10 text-primary text-xs px-3 py-1 rounded-full">有点搞笑</span>
+                        </div>
+                        <p class="text-light/70 text-sm mb-6">口头禅：你行不行啊</p>
+                        <a href="#contact" class="inline-block py-2 px-6 border border-accent text-accent rounded-lg hover:bg-accent/5 transition-colors">立即咨单</a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mt-12 text-center">
+                <a href="#contact" class="inline-flex items-center gap-2 text-primary hover:text-primary/80 transition-colors">
+                    更多优质陪玩请咨询团长<i class="fa fa-arrow-right"></i>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- 纳新公告 -->
+    <section id="recruit" class="py-20 bg-gradient-to-b from-dark/90 to-dark">
+        <div class="container mx-auto px-4">
+            <div class="grid md:grid-cols-2 gap-12 items-center">
+                <div>
+                    <div class="inline-block bg-primary/10 text-primary px-4 py-1 rounded-full text-sm font-medium mb-4"></div>
+                    <h2 class="text-[clamp(1.8rem,3vw,2.5rem)] font-display font-bold mb-6">加入清璃，共创辉煌</h2>
+                    <div class="bg-dark/50 border border-white/10 rounded-2xl p-6 mb-6">
+                        <div class="flex items-start gap-4 mb-4">
+                            <div class="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center text-primary flex-shrink-0">
+                                <i class="fa fa-bullhorn"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-bold mb-2">招募要求</h3>
+                                <ul class="text-light/70 space-y-2">
+                                    <li>• 年龄15+</li>
+                                    <li>• 声音有辨识度，表达活泼有元气</li>
+                                    <li>• 互动意识强，会主动回应话题、情绪或需求</li>
+                                    <li>• 遵守团队规章制度，维护团队形象</li>
+                                    <li>注意:我们会对您进行考核评估，请按照自身申请的服务性质找对应的考官进行考核，详情请咨询团长微信（联系方式置于网站底部）</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-dark/50 border border-white/10 rounded-2xl p-6 mb-6">
+                        <div class="flex items-start gap-4">
+                            <div class="w-10 h-10 rounded-full bg-secondary/20 flex items-center justify-center text-secondary flex-shrink-0">
+                                <i class="fa fa-gift"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-bold mb-2">为什么加入清璃？</h3>
+                                <ul class="text-light/70 space-y-2">
+                                    <li>• 新团无会费：清璃是新兴的线上陪伴社团，满足要求即可加入，无需支付任何费用。</li>
+                                    <li>• 氛围轻松：清璃是一个非常轻松的社团，成员之间的互动非常频繁，没有业绩要求</li>
+                                    <li>• 发展可期：清璃是一个未来可期的社团，成员间互帮互助，一起成长，一起进步。</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <a href="#contact" class="inline-flex items-center gap-2 bg-gradient-to-r from-primary to-secondary px-6 py-3 rounded-full font-medium hover:shadow-lg hover:shadow-primary/20 transition-all">
+                        立即咨询 <i class="fa fa-arrow-right"></i>
+                    </a>
+                </div>
+                
+                <div class="relative">
+                    <div class="aspect-square rounded-2xl overflow-hidden bg-gradient-to-br from-dark/80 to-dark/40 border border-white/10 shadow-xl">
+                        <img src="./图片文件/第一主图.jpeg" alt="QL CLUB招募" class="w-full h-full object-cover">
+                    </div>
+                    <!-- 装饰元素 -->
+                    <div class="absolute top-1/2 left-0 transform -translate-y-1/2 -translate-x-6 bg-dark border border-white/10 rounded-xl p-4 shadow-lg hover-scale">
+                        <div class="text-center">
+                            <div class="text-primary text-3xl font-bold mb-1">20+</div>
+                            <div class="text-light/70 text-xs">优秀成员</div>
+                        </div>
+                    </div>
+                    <div class="absolute top-1/2 right-0 transform -translate-y-1/2 translate-x-6 bg-dark border border-white/10 rounded-xl p-4 shadow-lg hover-scale">
+                        <div class="text-center">
+                            <div class="text-secondary text-3xl font-bold mb-1">约24h</div>
+                            <div class="text-light/70 text-xs">在线服务</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 联系我们 -->
+    <section id="contact" class="py-20 bg-gradient-to-b from-dark to-dark/90">
+        <div class="container mx-auto px-4">
+            <div class="text-center max-w-2xl mx-auto mb-16">
+                <div class="inline-block bg-primary/10 text-primary px-4 py-1 rounded-full text-sm font-medium mb-4"></div>
+                <h2 class="text-[clamp(1.8rem,3vw,2.5rem)] font-display font-bold mb-4">我们随时为你服务</h2>
+                <p class="text-light/70">无论你有任何问题或需求，都可以通过以下方式联系我们</p>
+            </div>
+            
+            <div class="grid md:grid-cols-2 gap-8 md:gap-12">
+                <!-- 左侧：团长微信（含二维码） -->
+                <div class="bg-dark/50 border border-white/10 rounded-2xl p-6 hover-scale">
+                    <div class="mb-6">
+                        <div class="flex items-center gap-4 mb-4">
+                            <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-primary/20 flex items-center justify-center text-primary flex-shrink-0">
+                                <i class="fa fa-weixin text-xl"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-lg sm:text-xl">团长微信</h3>
+                                <p class="text-light/70">添加团长微信，即可联系我们</p>
+                            </div>
+                        </div>
+                        
+                        <!-- 二维码区域 -->
+                        <div class="bg-dark border border-white/20 rounded-xl p-4 text-center mb-6">
+                            <img src="./图片文件/548.png" alt="团长微信二维码" class="w-40 h-40 sm:w-48 sm:h-48 mx-auto rounded-lg object-cover">
+                            <p class="mt-4 text-light/70 text-sm">扫码添加团长微信</p>
+                        </div>
+                        
+                        <!-- 微信号 -->
+                        <div class="flex items-center gap-3 justify-center">
+                            <span class="bg-dark border border-white/10 rounded-lg px-4 py-2 font-mono">hbq201079</span>
+                            <button class="text-primary hover:text-primary/80 transition-colors">
+                                <i class="fa fa-copy"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 右侧：成员留言栏 -->
+                <div class="bg-dark/50 border border-white/10 rounded-2xl p-6 hover-scale">
+                    <div class="bg-dark border border-white/10 rounded-xl p-4 sm:p-6 text-center mb-4">
+                        <p class="text-light/90 text-base sm:text-lg mb-4">清璃映心河，共赏岁月诗。入清璃俱乐部，与雅共舞，且听风吟，静享生活雅趣</p>
+                        <p class="text-secondary font-medium">——清璃团长：小倩</p>
+                    </div>
+                    <div class="bg-dark border border-white/10 rounded-xl p-6 text-center mb-4">
+                        <p class="text-light/90 text-base sm:text-lg mb-4">清璃不是现成的风景，是我们要一起搭的月台——从空白里铺第一块砖，从陌生里撞出同频的光，你攥着的期待，会是它生长的坐标。来入伙吧，我们一起把'刚开始'活成'了不起'</p>
+                        <p class="text-secondary font-medium">——清璃成员：张张</p>
+                    </div>
+                    <div class="bg-dark border border-white/10 rounded-xl p-6 text-center">
+                        <p class="text-light/90 text-base sm:text-lg mb-4">清璃是新起的太阳，它有向着未来美好奔跑的勇气，也有着再来一次的毅力，我们怀揣着这样的信念必将功成</p>
+                        <p class="text-secondary font-medium">——清璃成员&网站开发与维护：酸奶包</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 页脚 -->
+    <footer class="bg-dark border-t border-white/10 py-10">
+        <div class="container mx-auto px-4">
+            <div class="grid sm:grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8 mb-8">
+                <div>
+                    <div class="flex items-center gap-2 mb-4">
+                        <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-secondary flex items-center justify-center font-bold text-sm">QL</div>
+                        <span class="font-display font-bold text-lg">清璃俱乐部</span>
+                    </div>
+                    <p class="text-light/70 text-sm mb-4">期待每一次相遇，用心陪伴每一次来客</p>
+                    <div class="flex gap-4">
+                        <a href="#" class="w-8 h-8 rounded-full bg-dark border border-white/10 flex items-center justify-center text-light/70 hover:text-primary hover:border-primary transition-colors">
+                            <i class="fa fa-weibo"></i>
+                        </a>
+                        <a href="#" class="w-8 h-8 rounded-full bg-dark border border-white/10 flex items-center justify-center text-light/70 hover:text-primary hover:border-primary transition-colors">
+                            <i class="fa fa-weixin"></i>
+                        </a>
+                        <a href="#" class="w-8 h-8 rounded-full bg-dark border border-white/10 flex items-center justify-center text-light/70 hover:text-primary hover:border-primary transition-colors">
+                            <i class="fa fa-qq"></i>
+                        </a>
+                    </div>
+                </div>
+                
+                <div>
+                    <h4 class="font-bold mb-4">服务项目</h4>
+                    <ul class="space-y-2 text-light/70">
+                        <li><a href="#" class="hover:text-primary transition-colors">游戏陪玩</a></li>
+                        <li><a href="#" class="hover:text-primary transition-colors">段位代打</a></li>
+                        <li><a href="#" class="hover:text-primary transition-colors">文字陪聊</a></li>
+                        <li><a href="#" class="hover:text-primary transition-colors">语音陪聊</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h4 class="font-bold mb-4">关于我们</h4>
+                    <ul class="space-y-2 text-light/70">
+                        <li><a href="#about" class="hover:text-primary transition-colors">团队介绍</a></li>
+                        <li><a href="#team" class="hover:text-primary transition-colors">门面展示</a></li>
+                        <li><a href="#recruit" class="hover:text-primary transition-colors">加入我们</a></li>
+                        <li><a href="#" class="hover:text-primary transition-colors">服务协议</a></li>
+                    </ul>
+                </div>
+            
+            <div class="border-t border-white/10 pt-8 text-center text-light/50 text-sm">
+                <p>© 2025 清璃俱乐部 版权所有 | 期待每一次相遇，用心陪伴每一次来客</p>
+            </div>
+        </div>
+    </footer>
+
+
+      <!-- 回到顶部按钮 -->
+      <button id="backToTop" title="回到顶部">
+          <i class="fa fa-arrow-up"></i>
+      </button>
+      
+      <!-- JavaScript -->
+      <script>
+
+          
+          // 回到顶部功能
+          const backToTopBtn = document.getElementById('backToTop');
+          
+          // 滚动监听，控制按钮显示/隐藏
+          window.addEventListener('scroll', () => {
+              if (window.pageYOffset > 300) {
+                  backToTopBtn.classList.remove('opacity-0');
+                  backToTopBtn.classList.add('opacity-100');
+              } else {
+                  backToTopBtn.classList.remove('opacity-100');
+                  backToTopBtn.classList.add('opacity-0');
+              }
+          });
+          
+          // 点击事件 - 平滑滚动到顶部
+          backToTopBtn.addEventListener('click', () => {
+              window.scrollTo({
+                  top: 0,
+                  behavior: 'smooth'
+              });
+          });
+        // 导航栏滚动效果
+        const navbar = document.getElementById('navbar');
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 50) {
+                navbar.classList.add('bg-dark/95', 'shadow-lg');
+            } else {
+                navbar.classList.remove('bg-dark/95', 'shadow-lg');
+            }
+        });
